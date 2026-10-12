@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>Sequence Desk | DNA Analyzer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18231f;
+      --muted: #69766f;
+      --paper: #f5f7f4;
+      --surface: #ffffff;
+      --line: #dce4de;
+      --green: #24654e;
+      --green-soft: #e5f1e9;
+      --orange: #c5683d;
+      --blue: #477c91;
+      --gold: #aa8533;
+      --shadow: 0 22px 60px #24352b12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background-color: var(--paper);
+      background-image: radial-gradient(#cdd8cf 0.7px, transparent 0.7px);
+      background-size: 18px 18px;
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    button, textarea { font: inherit; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      padding: 0 clamp(20px, 6vw, 88px);
+      border-bottom: 1px solid #dce4de;
+      background: #f8faf7e8;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--green);
+      color: white;
+      font-size: 17px;
+    }
+
+    .topbar-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main {
+      width: min(100% - 40px, 1060px);
+      margin: 0 auto;
+      padding: clamp(42px, 8vh, 82px) 0 64px;
+      animation: appear 500ms ease-out both;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 14px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 20px;
+      height: 2px;
+      background: var(--orange);
+      content: "";
+    }
+
+    h1 {
+      max-width: 660px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(38px, 7vw, 68px);
+      font-weight: 500;
+      line-height: 1.03;
+    }
+
+    .intro {
+      max-width: 520px;
+      margin: 17px 0 34px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .input-panel, .results-panel { padding: clamp(22px, 4vw, 34px); }
+
+    .results-panel {
+      border-left: 1px solid var(--line);
+      background: #fbfcfa;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .sequence-length {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 210px;
+      resize: vertical;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      outline: none;
+      background-color: #fbfcfa;
+      background-image: linear-gradient(#edf1ed 1px, transparent 1px);
+      background-size: 100% 29px;
+      color: var(--ink);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 29px;
+      transition: border-color 150ms, box-shadow 150ms;
+    }
+
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px #24654e18;
+    }
+
+    .input-hint {
+      min-height: 19px;
+      margin: 10px 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .input-hint.error { color: #a33c2c; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .actions button {
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: white;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: background 150ms, transform 150ms;
+    }
+
+    .actions button:hover { background: #f1f5f1; }
+    .actions button:active { transform: translateY(1px); }
+
+    .actions .primary {
+      border-color: var(--green);
+      background: var(--green);
+      color: white;
+    }
+
+    .actions .primary:hover { background: #1b523e; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 94px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+    }
+
+    .metric-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-a { background: var(--green); }
+    .dot-t { background: var(--orange); }
+    .dot-g { background: var(--blue); }
+    .dot-c { background: var(--gold); }
+
+    .metric-value {
+      display: block;
+      margin-top: 9px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 12px;
+      padding: 15px 2px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary strong { color: var(--ink); font-size: 13px; }
+
+    .bar-track {
+      height: 7px;
+      overflow: hidden;
+      margin-top: 16px;
+      border-radius: 5px;
+      background: #e9eeea;
+    }
+
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), #7caa78);
+      transition: width 250ms ease;
+    }
+
+    .complement {
+      margin-top: 18px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+    }
+
+    .complement-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .complement-value {
+      overflow-wrap: anywhere;
+      color: var(--green);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .topbar { min-height: 62px; padding-inline: 20px; }
+      .topbar-note { display: none; }
+      main { padding-top: 42px; }
+      .workspace { grid-template-columns: 1fr; }
+      .results-panel { border-top: 1px solid var(--line); border-left: 0; }
+      textarea { min-height: 170px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">⌬</span> Sequence Desk</div>
+    <div class="topbar-note">A simple workspace for DNA sequence checks</div>
+  </header>
+
+  <main>
+    <p class="eyebrow">Nucleotide analysis</p>
+    <h1>Read the building blocks.</h1>
+    <p class="intro">Paste a DNA sequence to count each nucleotide, measure GC content, and generate its complementary strand.</p>
+
+    <section class="workspace" aria-label="DNA sequence analyzer">
+      <div class="input-panel">
+        <div class="panel-heading">
+          <h2>Sequence input</h2>
+          <span class="sequence-length" id="sequenceLength">0 bases</span>
+        </div>
+        <label for="sequence" class="visually-hidden">DNA sequence</label>
+        <textarea id="sequence" spellcheck="false" autocapitalize="characters" aria-describedby="inputHint" placeholder="Paste or type A, T, G, C...">ATGCGATCGA</textarea>
+        <p class="input-hint" id="inputHint" role="status">Whitespace and line breaks are ignored.</p>
+        <div class="actions">
+          <button class="primary" id="analyzeButton" type="button">Analyze sequence</button>
+          <button id="exampleButton" type="button">Load example</button>
+          <button id="clearButton" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div class="results-panel" aria-live="polite">
+        <div class="panel-heading">
+          <h2>Results</h2>
+          <span class="sequence-length">DNA · 4 bases</span>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span class="metric-label"><span class="dot dot-a"></span>Adenine · A</span><strong class="metric-value" id="countA">0</strong></div>
+          <div class="metric"><span class="metric-label"><span class="dot dot-t"></span>Thymine · T</span><strong class="metric-value" id="countT">0</strong></div>
+          <div class="metric"><span class="metric-label"><span class="dot dot-g"></span>Guanine · G</span><strong class="metric-value" id="countG">0</strong></div>
+          <div class="metric"><span class="metric-label"><span class="dot dot-c"></span>Cytosine · C</span><strong class="metric-value" id="countC">0</strong></div>
+        </div>
+        <div class="summary">
+          <span>GC content</span>
+          <strong id="gcContent">0%</strong>
+        </div>
+        <div class="bar-track" role="img" aria-label="GC content" id="gcBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar-fill" id="gcBarFill"></div></div>
+        <div class="complement">
+          <p class="complement-label">Complementary strand</p>
+          <div class="complement-value" id="complement">Your sequence complement will appear here.</div>
+        </div>
+      </div>
+    </section>
+    <footer>Only A, T, G, and C are accepted. Your sequence stays in this browser.</footer>
+  </main>
+
+  <script>
+    const sequenceInput = document.querySelector("#sequence");
+    const inputHint = document.querySelector("#inputHint");
+    const exampleSequence = "ATGCGATCGA";
+
+    function analyzeSequence() {
+      const sequence = sequenceInput.value.replace(/\s+/g, "").toUpperCase();
+      const invalidCharacters = sequence.match(/[^ATGC]/g);
+
+      sequenceInput.value = sequence;
+      document.querySelector("#sequenceLength").textContent = `${sequence.length} ${sequence.length === 1 ? "base" : "bases"}`;
+
+      if (invalidCharacters) {
+        inputHint.textContent = `Invalid character${invalidCharacters.length === 1 ? "" : "s"}: ${[...new Set(invalidCharacters)].join(" ")}. Use only A, T, G, and C.`;
+        inputHint.classList.add("error");
+        return;
+      }
+
+      inputHint.textContent = sequence.length ? "Sequence analyzed successfully." : "Enter a DNA sequence to see its results.";
+      inputHint.classList.remove("error");
+
+      const counts = {
+        A: (sequence.match(/A/g) || []).length,
+        T: (sequence.match(/T/g) || []).length,
+        G: (sequence.match(/G/g) || []).length,
+        C: (sequence.match(/C/g) || []).length
+      };
+
+      for (const base of ["A", "T", "G", "C"]) {
+        document.querySelector(`#count${base}`).textContent = counts[base];
+      }
+
+      const gcPercent = sequence.length ? ((counts.G + counts.C) / sequence.length) * 100 : 0;
+      document.querySelector("#gcContent").textContent = `${gcPercent.toFixed(1)}%`;
+      document.querySelector("#gcBarFill").style.width = `${gcPercent}%`;
+      document.querySelector("#gcBar").setAttribute("aria-valuenow", gcPercent.toFixed(1));
+      document.querySelector("#complement").textContent = sequence ? sequence.replace(/[ATGC]/g, base => ({ A: "T", T: "A", G: "C", C: "G" })[base]) : "Your sequence complement will appear here.";
+    }
+
+    document.querySelector("#analyzeButton").addEventListener("click", analyzeSequence);
+    document.querySelector("#exampleButton").addEventListener("click", () => {
+      sequenceInput.value = exampleSequence;
+      analyzeSequence();
+    });
+    document.querySelector("#clearButton").addEventListener("click", () => {
+      sequenceInput.value = "";
+      analyzeSequence();
+      sequenceInput.focus();
+    });
+
+    analyzeSequence();
+  </script>
+</body>
+</html>
